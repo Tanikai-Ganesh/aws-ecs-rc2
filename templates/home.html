@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Score Prediction</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #f9f9f9;
+            transition: border-color 0.3s ease;
+        }
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+        /* Ensure spinners are visible and styled consistently */
+        input[type="number"] {
+            appearance: textfield; /* Standard property */
+            -webkit-appearance: textfield; /* For older Webkit browsers */
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1; /* Keep spinners visible in Webkit browsers */
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #764ba2;
+        }
+        #result {
+            margin-top: 25px;
+            text-align: center;
+            color: #333;
+            font-size: 18px;
+            display: none;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Math Score Predictor</h1>
+        <form id="predictionForm" action="/predictdata" method="POST">
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select name="gender" id="gender">
+                    <option value="">Select your Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="ethnicity">Race or Ethnicity</label>
+                <select name="ethnicity" id="ethnicity">
+                    <option value="">Select your Ethnicity</option>
+                    <option value="group A">Group A</option>
+                    <option value="group B">Group B</option>
+                    <option value="group C">Group C</option>
+                    <option value="group D">Group D</option>
+                    <option value="group E">Group E</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="parental_level_of_education">Parental Level of Education</label>
+                <select name="parental_level_of_education" id="parental_level_of_education">
+                    <option value="">Select your Parent Education</option>
+                    <option value="associate's degree">Associate's degree</option>
+                    <option value="bachelor's degree">Bachelor's degree</option>
+                    <option value="high school">High school</option>
+                    <option value="master's degree">Master's degree</option>
+                    <option value="some college">Some college</option>
+                    <option value="some high school">Some high school</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="lunch">Lunch Type</label>
+                <select name="lunch" id="lunch">
+                    <option value="">Select your Lunch Type</option>
+                    <option value="free/reduced">free/reduced</option>
+                    <option value="standard">standard</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="test_preparation_course">Test Preparation Course</label>
+                <select name="test_preparation_course" id="test_preparation_course">
+                    <option value="">Select your Test Course</option>
+                    <option value="none">None</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="reading_score">Reading Score out of 100</label>
+                <input type="number" name="reading_score" id="reading_score" 
+                       placeholder="Enter your Reading score" min="0" max="100">
+            </div>
+
+            <div class="form-group">
+                <label for="writing_score">Writing Score out of 100</label>
+                <input type="number" name="writing_score" id="writing_score" 
+                       placeholder="Enter your Writing score" min="0" max="100">
+            </div>
+
+            <button type="submit">Predict your Maths Score</button>
+            <div id="result"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            // Client-side validation for scores
+            const readingScore = formData.get('reading_score');
+            const writingScore = formData.get('writing_score');
+            const resultDiv = document.getElementById('result');
+
+            if (!readingScore || !writingScore || 
+                readingScore < 0 || readingScore > 100 || 
+                writingScore < 0 || writingScore > 100) {
+                resultDiv.style.display = 'block';
+                resultDiv.style.color = '#ff4444';
+                resultDiv.textContent = 'Please enter valid scores between 0 and 100';
+                return;
+            }
+
+            try {
+                const response = await fetch('/predictdata', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.style.color = '#333';
+                    resultDiv.textContent = `The prediction is ${data.prediction}`;
+                } else {
+                    resultDiv.style.display = 'block';
+                    resultDiv.style.color = '#ff4444';
+                    resultDiv.textContent = data.error || 'An error occurred';
+                }
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.style.color = '#ff4444';
+                resultDiv.textContent = 'Error connecting to server';
+            }
+        });
+    </script>
+</body>
+</html>
